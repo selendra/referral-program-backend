@@ -14,7 +14,8 @@ const referralSchema = mongoose.Schema({
     ref: 'user'
   },
   transactionHash: {
-    type: String
+    type: String,
+    required: true
   }
 })
 

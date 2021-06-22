@@ -6,6 +6,7 @@ const Web3 = require('web3');
 const { v4: uuidv4 } = require("uuid");
 
 const { Referral } = require('../model/referral');
+const { useWeb3 } = require('../util/useWeb3');
 
 exports.getReferral = asyncHandler(async(req, res, next) => {
   const referral = await Referral.find({ userId: req.user.id });
@@ -29,7 +30,10 @@ exports.createReferral = asyncHandler(async(req, res, next) => {
     req.body.password
   );
 
-  const transaction = contract.methods.transfer('0x1d95aD53E69Fe58efe777a7490EcF63A2CcbB1De',web3.utils.toHex(web3.utils.toWei('1', 'ether')));
+  const transaction = contract.methods.transfer(
+    '0x1d95aD53E69Fe58efe777a7490EcF63A2CcbB1De',
+    web3.utils.toHex(web3.utils.toWei('1', 'ether'))
+  );
   const options = {
     to      : transaction._parent._address,
     data    : transaction.encodeABI(),
@@ -57,4 +61,16 @@ exports.createReferral = asyncHandler(async(req, res, next) => {
       error: 'Transaction Failed!'
     })
   }
+})
+
+exports.createReferralByMetamask = asyncHandler(async(req, res, next) => {
+  const referral = await Referral.create({
+    referral_id: uuidv4(),
+    userId: req.user.id,
+    transactionHash: req.body.txHash
+  })
+
+  res.status(200).json({
+    data: referral
+  })
 })
