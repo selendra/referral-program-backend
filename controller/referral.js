@@ -20,7 +20,7 @@ exports.getReferral = asyncHandler(async(req, res, next) => {
 
 exports.createReferral = asyncHandler(async(req, res, next) => {
   const testnet = 'https://data-seed-prebsc-1-s1.binance.org:8545';
-  const contractAddress = '0xd84D89d5C9Df06755b5D591794241d3FD20669Ce';
+  const contractAddress = '0xc7fe9232c55fab39fd7c89aa459aa03c55ee283c';
 
   let web3 = new Web3(testnet);
   let contract = new web3.eth.Contract(abi, contractAddress);
@@ -64,6 +64,7 @@ exports.createReferral = asyncHandler(async(req, res, next) => {
 })
 
 exports.createReferralByMetamask = asyncHandler(async(req, res, next) => {
+  if(!req.body.txHash) return next(new ErrorResponse('Transaction Failed!', 400));
   const referral = await Referral.create({
     referral_id: uuidv4(),
     userId: req.user.id,
