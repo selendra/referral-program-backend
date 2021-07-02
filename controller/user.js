@@ -18,8 +18,10 @@ exports.getUser = asyncHandler(async(req, res, next) => {
 })
 
 exports.createUser = asyncHandler(async(req, res, next) => {
+  const email = await User.findOne({ email: req.body.email });
   const phone = await User.findOne({ phone: req.body.phone });
   const wallet = await User.findOne({ wallet: req.body.wallet });
+  if(email) return next(new ErrorResponse('This email already register!!', 400));
   if(phone) return next(new ErrorResponse('This phone number already register!!', 400));
   if(wallet) return next(new ErrorResponse('This wallet address already register!!', 400));
 
@@ -27,6 +29,7 @@ exports.createUser = asyncHandler(async(req, res, next) => {
   const referral = await Referral.create({
     referral_id: uuidv4(),
     userId: user._id,
+    transactionHash: 'Register Account'
   })
 
   res.status(200).json({

@@ -65,13 +65,34 @@ exports.createReferral = asyncHandler(async(req, res, next) => {
 
 exports.createReferralByMetamask = asyncHandler(async(req, res, next) => {
   if(!req.body.txHash) return next(new ErrorResponse('Transaction Failed!', 400));
-  const referral = await Referral.create({
-    referral_id: uuidv4(),
-    userId: req.user.id,
-    transactionHash: req.body.txHash
-  })
 
-  res.status(200).json({
-    data: referral
-  })
+  function PendingTrx() { 
+    const web3 = useWeb3();
+    web3.eth.getTransactionReceipt(req.body.txHash, async function (error, result) { 
+      if(result === null || error) {
+        setTimeout(() => {
+          PendingTrx();
+        }, 2000);
+      } else if(result !== null || !error) {
+        // console.log(result);
+        if(result.status === true) {
+          const referral = await Referral.create({
+            referral_id: uuidv4(),
+            userId: req.user.id,
+            transactionHash: req.body.txHash
+          })
+        
+          res.status(200).json({
+            data: referral
+          })
+        } else {
+          return next(new ErrorResponse('Transaction Failed!', 400));
+        }
+      }
+    })
+  }
+
+  setTimeout(() => {
+    PendingTrx();
+  }, 2000);
 })
