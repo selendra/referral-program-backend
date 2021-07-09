@@ -18,14 +18,20 @@ exports.getUser = asyncHandler(async(req, res, next) => {
 })
 
 exports.createUser = asyncHandler(async(req, res, next) => {
-  const email = await User.findOne({ email: req.body.email });
+  const email = await User.findOne({ email: req.body.email.toLowerCase() });
   const phone = await User.findOne({ phone: req.body.phone });
-  const wallet = await User.findOne({ wallet: req.body.wallet });
+  const wallet = await User.findOne({ wallet: req.body.wallet.toLowerCase() });
   if(email) return next(new ErrorResponse('This email already register!!', 400));
   if(phone) return next(new ErrorResponse('This phone number already register!!', 400));
   if(wallet) return next(new ErrorResponse('This wallet address already register!!', 400));
 
-  const user = await User.create(req.body);
+  const user = await User.create({
+    email: req.body.email.toLowerCase(),
+    password: req.body.password,
+    phone: req.body.phone,
+    wallet: req.body.wallet.toLowerCase()
+  });
+
   const referral = await Referral.create({
     referral_id: uuidv4(),
     userId: user._id,
@@ -40,13 +46,13 @@ exports.createUser = asyncHandler(async(req, res, next) => {
 
 exports.loginUser =  asyncHandler(async(req, res, next) => {
   const secret = process.env.SECRET;
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const { password } = req.body;
+  const user = await User.findOne({ email: req.body.email.toLowerCase() });
 
   if(!user) return next(new ErrorResponse(`User not found`, 404));
   if(user && bcryptjs.compareSync(password, user.password)) {
     const token = jwt.sign(
-      { 
+      {
         userId: user.id,
       }, 
       secret,
