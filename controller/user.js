@@ -164,7 +164,10 @@ exports.updateUser = asyncHandler(async(req, res, next) => {
   if(phone) return next(new ErrorResponse('This phone number already register!!', 400));
   if(wallet) return next(new ErrorResponse('This wallet address already register!!', 400));
 
-  user = await User.findByIdAndUpdate(req.user.id, req.body, {
+  user = await User.findByIdAndUpdate(req.user.id, {
+    phone: req.body.phone,
+    wallet: req.body.wallet.toLowerCase()
+  }, {
     new: true,
     runValidators: true
   }); 
