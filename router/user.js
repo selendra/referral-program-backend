@@ -25,7 +25,7 @@ router
   .get(protect, getUser)
 
 router
-  .route('/update/:id')
+  .route('/updateprofile')
   .put(protect, updateUser)
 
 module.exports = router;

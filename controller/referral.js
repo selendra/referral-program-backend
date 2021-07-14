@@ -1,12 +1,11 @@
 const asyncHandler = require('../middleware/asyncHandler');
 const ErrorResponse = require('../util/errorResponse');
-const abi = require('../contract/abi.json');
 
-const Web3 = require('web3');
 const { v4: uuidv4 } = require("uuid");
 
 const { Referral } = require('../model/referral');
 const { useWeb3 } = require('../util/useWeb3');
+const { useContract } = require('../util/useContract');
 
 exports.getReferral = asyncHandler(async(req, res, next) => {
   const referral = await Referral.find({ userId: req.user.id });
@@ -19,11 +18,8 @@ exports.getReferral = asyncHandler(async(req, res, next) => {
 })
 
 exports.createReferral = asyncHandler(async(req, res, next) => {
-  const testnet = 'https://data-seed-prebsc-1-s1.binance.org:8545';
-  const contractAddress = '0xc7fe9232c55fab39fd7c89aa459aa03c55ee283c';
-
-  let web3 = new Web3(testnet);
-  let contract = new web3.eth.Contract(abi, contractAddress);
+  let web3 = useWeb3();
+  let contract = useContract();
 
   const decrypt = await web3.eth.accounts.decrypt(
     JSON.parse(req.body.keystore), 
@@ -74,7 +70,6 @@ exports.createReferralByMetamask = asyncHandler(async(req, res, next) => {
           PendingTrx();
         }, 2000);
       } else if(result !== null || !error) {
-        // console.log(result);
         if(result.status === true) {
           const referral = await Referral.create({
             referral_id: uuidv4(),

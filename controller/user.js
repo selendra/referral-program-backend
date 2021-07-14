@@ -123,7 +123,7 @@ exports.facebookLogin = asyncHandler(async(req, res, next) => {
   })
   const data = await response.json();
   const { email } = data;
-  
+
   const user = await User.findOne({email: email.toLowerCase()});
   const secret = process.env.SECRET;
   if(user) {
@@ -159,10 +159,12 @@ exports.facebookLogin = asyncHandler(async(req, res, next) => {
 })
 
 exports.updateUser = asyncHandler(async(req, res, next) => {
-  const user = await User.findById(req.user.id);
-  if(!user) return next(new ErrorResponse(`User not found`, 404));
+  const phone = await User.findOne({ phone: req.body.phone });
+  const wallet = await User.findOne({ wallet: req.body.wallet.toLowerCase() });
+  if(phone) return next(new ErrorResponse('This phone number already register!!', 400));
+  if(wallet) return next(new ErrorResponse('This wallet address already register!!', 400));
 
-  user = await User.findByIdAndUpdate(req.params.id, req.body, {
+  user = await User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
     runValidators: true
   }); 
